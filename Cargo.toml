@@ -1,0 +1,15 @@
+[package]
+name = "guile-json-parser"
+version = "0.1.0"
+authors = ["Vee Satayamas <vee.sa@protonmail.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+name = "json_parser"
+
+[dependencies]
+lazy_static = "1.4"
+guile-3-sys = "0.1"
