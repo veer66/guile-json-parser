@@ -12,6 +12,7 @@ use guile_3_sys::{
 use serde_json;
 use serde_json::{Number, Value};
 use std::ffi::CString;
+use serde_json::map::Map;
 
 type N = usize;
 
@@ -62,11 +63,11 @@ macro_rules! scm2ptr {
     }
 }
 
-macro_rules! scm_gc_cell_object {
-    ($x:expr, $n:expr) => {
-	scm2ptr!($x).offset($n) as *mut SCM
-    }
-}
+// macro_rules! scm_gc_cell_object {
+//     ($x:expr, $n:expr) => {
+// 	scm2ptr!($x).offset($n) as *mut SCM
+//     }
+// }
 
 macro_rules! scm_gc_set_cell_object {
     ($x:expr, $n:expr, $v:expr) => {	
@@ -142,16 +143,25 @@ fn convert_array(a: &[Value]) -> SCM {
     l
 }
 
+fn convert_object(m: &Map<String, Value>) -> SCM {
+    let mut alist: SCM = SCM_EOL;
+    for (k, v) in m.iter() {
+	let k_ = convert_string(k);
+	let v_ = convert(&v);
+	let elem = scm_cons(k_, v_);
+	alist = scm_cons(elem, alist);
+    }
+    alist
+}
+
 fn convert(v: &Value) -> SCM {
-    unsafe {
-        match v {
-            Value::Null => convert_null(),
-            Value::Bool(b) => convert_bool(*b),
-            Value::Number(n) => convert_number(n),
-            Value::String(s) => convert_string(&s),
-            Value::Array(a) => convert_array(&a),
-            Value::Object(m) => scm_from_utf8_stringn("ABC".as_ptr() as *const i8, 3),
-        }
+    match v {
+        Value::Null => convert_null(),
+        Value::Bool(b) => convert_bool(*b),
+        Value::Number(n) => convert_number(n),
+        Value::String(s) => convert_string(&s),
+        Value::Array(a) => convert_array(&a),
+        Value::Object(m) => convert_object(m),
     }
 }
 
